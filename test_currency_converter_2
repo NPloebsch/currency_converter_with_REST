@@ -1,0 +1,73 @@
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class CurrencyConverterTest {
+    private Connection connection;
+    private CurrencyDao currencyDao;
+    private CurrencyConverter currencyConverter;
+    
+    @Before
+    public void setup() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.jdbc.Driver");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/currency_converter_test", "root", "password");
+        currencyDao = new CurrencyDao(connection);
+        currencyConverter = new CurrencyConverter(currencyDao);
+        currencyDao.addCurrency(new Currency(1, "USD", 1.0));
+        currencyDao.addCurrency(new Currency(2, "EUR", 0.85));
+        currencyDao.addCurrency(new Currency(3, "GBP", 0.72));
+    }
+    
+    @After
+    public void cleanup() throws SQLException {
+        currencyDao.deleteCurrency(1);
+        currencyDao.deleteCurrency(2);
+        currencyDao.deleteCurrency(3);
+        connection.close();
+    }
+    
+    @Test
+    public void testConvertCurrency() throws SQLException {
+        double result = currencyConverter.convertCurrency(100.0, "USD", "EUR");
+        assertEquals(85.0, result, 0.001);
+    }
+    
+    @Test
+    public void testAddCurrency() throws SQLException {
+        Currency newCurrency = new Currency(4, "JPY", 109.98);
+        currencyDao.addCurrency(newCurrency);
+        Currency retrievedCurrency = currencyDao.getCurrencyById(4);
+        assertNotNull(retrievedCurrency);
+        assertEquals(newCurrency.getName(), retrievedCurrency.getName());
+        assertEquals(newCurrency.getExchangeRate(), retrievedCurrency.getExchangeRate(), 0.001);
+    }
+    
+    @Test
+    public void testUpdateCurrency() throws SQLException {
+        Currency currencyToUpdate = new Currency(2, "EUR", 0.9);
+        currencyDao.updateCurrency(currencyToUpdate);
+        Currency retrievedCurrency = currencyDao.getCurrencyById(2);
+        assertNotNull(retrievedCurrency);
+        assertEquals(currencyToUpdate.getName(), retrievedCurrency.getName());
+        assertEquals(currencyToUpdate.getExchangeRate(), retrievedCurrency.getExchangeRate(), 0.001);
+    }
+    
+    @Test
+    public void testDeleteCurrency() throws SQLException {
+        currencyDao.deleteCurrency(3);
+        Currency retrievedCurrency = currencyDao.getCurrencyById(3);
+        assertNull(retrievedCurrency);
+    }
+    
+    @Test
+    public void testGetAllCurrencies() throws SQLException {
+        List<Currency> currencies = currencyDao.getAllCurrencies();
+        assertEquals(3, currencies.size());
+    }
+}
