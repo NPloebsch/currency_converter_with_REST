@@ -12,3 +12,12 @@ Test_ Unit-Test:
  -   Deletes the currency from the database and checks if it is no longer found.
  -   Retrieves all currencies from the database and checks if the number of returned currencies is correct.
  -   Converts an amount from USD to EUR and checks if the conversion result is correct.
+
+Test 2:
+- Test that an IllegalArgumentException is thrown when converting an invalid currency
+- The purpose of the test is to ensure that an exception is thrown when attempting to convert an amount between two currencies that do not exist in the database.
+- The test sets up a connection to the database and initializes instances of CurrencyDao and CurrencyConverter for all tests.
+- The test creates an invalid currency name by concatenating two valid currency names.
+- The test attempts to convert an amount of USD to the invalid currency name and expects an IllegalArgumentException to be thrown.
+- The test asserts that the correct exception message is returned by checking if the message contains the expected substring "Invalid currency".
+- Finally, the test cleans up by deleting the invalid currency from the database so that it does not affect subsequent tests.
