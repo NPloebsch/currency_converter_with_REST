@@ -23,6 +23,7 @@ Test 2:
 - Finally, the test cleans up by deleting the invalid currency from the database so that it does not affect subsequent tests.
 
 
-
+How to start the Docker Container:
 docker build -t currency_converter_with_rest_main .
 docker run -d -p 3000:3000 currency_converter_with_rest_main:latest 
+http://localhost:3000/
